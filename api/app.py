@@ -1,26 +1,101 @@
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, status, Response
 from models import Models
-# from pydantic import BaseModel
+from pydantic import BaseModel
 
 app = FastAPI()
 
 models = Models()
 
-# class ModelItem(BaseModel):
-#     model_name: str
+class ModelItem(BaseModel):
+    model_name: str
 
-# class ModelUpd(BaseModel):
-#     model_id : int
-#     model_name: str
-#     ml_task: str
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "model_name": "LogisticRegression"
+                }
+            ]
+        }
+    }
 
-# class Request(BaseModel):
-#     data : dict
-#     params : dict
+class ModelUpd(BaseModel):
+    model_name: dict
 
-# class ModelPredict(BaseModel):
-#     data_test : dict
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                "model_name": 
+                    {
+                        'model_id': 1,
+                        'model_name': 'LogisticRegression',
+                        'ml_task': 'classification'
+                    }
+                }
+            ]
+        }
+    }
+
+class ModelFit(BaseModel):
+    data_train : dict
+    params : dict
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    'data_train': 
+                    {
+                        'Name': 
+                        {
+                            0: 'Tom', 
+                            1: 'Joseph', 
+                            2: 'Krish', 
+                            3: 'John'
+                        },
+                        'Age': 
+                        {
+                            0: 20, 
+                            1: 21, 
+                            2: 19, 
+                            3: 18
+                        }
+                    },
+                    'params': 
+                    {
+                        'random_state': 32
+                    }
+                }
+            ]
+        }
+    }
+
+class ModelPredict(BaseModel):
+    data_test : dict
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    'data_test': 
+                    {
+                        'Name': 
+                        {
+                            0: 'Marta', 
+                            1: 'Den'
+                        },
+                        'Age': 
+                        {
+                            0: 22, 
+                            1: 17
+                        }
+                    }
+                }
+            ]
+        }
+    }
 
 
 @app.get("/api/model_list/{task}")
@@ -47,21 +122,19 @@ def get_model_by_id(response: Response, model_id: int):
     return result
 
 @app.post("/api/create_model")
-async def create_model(response: Response, request: Request):
+async def create_model(response: Response, request: ModelItem):
     """
     Создает модель
     """
-    model_name = (await request.json())['model_name']
-    result, response.status_code = models.create_model(model_name=model_name)
+    result, response.status_code = models.create_model(model_name=request.model_name)
     return result
 
 @app.put("/api/update_model")
-async def update_model(response: Response, request: Request):
+async def update_model(response: Response, request: ModelUpd, status_code=status.HTTP_200_OK):
     """
     Обновляет модели
     """
-    model_name = (await request.json())['model_name']
-    status_code = models.update_model(model_name=model_name)
+    status_code = models.update_model(model_name=request.model_name)
     if (status_code != 200):
         response.status_code = status_code
 
@@ -75,23 +148,20 @@ def delete_model(response: Response, model_id: int):
         response.status_code = status_code
 
 @app.put("/api/fit/{model_id}")
-async def fit(response: Response, model_id: int, request: Request):
+async def fit(response: Response, model_id: int, request: ModelFit):
     """
     Обучает модель
     """
     model_id = model_id
-    data_train = (await request.json())['data_train']
-    params = (await request.json())['params']
-    result, response.status_code = models.fit(model_id, data_train, params)
+    result, response.status_code = models.fit(model_id, request.data_train, request.params)
     return result
 
 @app.put("/api/predict/{model_id}")
-async def predict(response: Response, model_id: int, request: Request):
+async def predict(response: Response, model_id: int, request: ModelPredict):
     """
     Возвращает прогноз модели
     """
-    data_test = (await request.json())['data_test']
-    result, response.status_code = models.predict(model_id, data_test)
+    result, response.status_code = models.predict(model_id, request.data_test)
     return result
 
 if __name__ == '__main__':

@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 import logging
+import pickle
+import os
 
 from pandas.core.frame import DataFrame
 # from fastapi.responses import JSONResponse
@@ -23,7 +25,33 @@ class Models:
         self.counter = 0
         self.ml_task = None
         self.available_models = defaultdict()
-        
+
+    #     self.models_file = 'models.pkl'
+    #     self.fitted_models_file = 'fitted_models.pkl'
+    #     self.counter = 0
+
+    #     # Load models from file if available
+    #     self.load_models()
+
+    # def load_models(self):
+    #     try:
+    #         with open(self.models_file, 'rb') as file:
+    #             self.models = pickle.load(file)
+    #     except FileNotFoundError:
+    #         self.models = []
+
+    #     try:
+    #         with open(self.fitted_models_file, 'rb') as file:
+    #             self.fitted_models = pickle.load(file)
+    #     except FileNotFoundError:
+    #         self.fitted_models = []
+
+    # def save_models(self):
+    #     with open(self.models_file, 'wb') as file:
+    #         pickle.dump(self.models, file)
+
+    #     with open(self.fitted_models_file, 'wb') as file:
+    #         pickle.dump(self.fitted_models, file)
 
     def available_model_list(self, task: str = '') -> str:
         """
@@ -52,6 +80,7 @@ class Models:
                 return model, 200
         logging.error(f"ML model {model_id} doesn't exist")
         return "ML model doesn't exist", 404  # Not found
+    
 
     def create_model(self, model_name: str = '') -> Dict:
         """
@@ -86,6 +115,7 @@ class Models:
         self.models.append(ml_model)
         self.fitted_models.append(fitted_model)
         return ml_model, 201
+    
     
     def update_model(self, model_dict: dict) -> None:
         """
