@@ -1,5 +1,3 @@
-# import uvicorn
-# import fastapi
 import numpy as np
 import pandas as pd
 import logging
@@ -7,7 +5,6 @@ import pickle
 import os
 
 from pandas.core.frame import DataFrame
-# from fastapi.responses import JSONResponse
 
 from collections import defaultdict
 
@@ -25,33 +22,6 @@ class Models:
         self.counter = 0
         self.ml_task = None
         self.available_models = defaultdict()
-
-    #     self.models_file = 'models.pkl'
-    #     self.fitted_models_file = 'fitted_models.pkl'
-    #     self.counter = 0
-
-    #     # Load models from file if available
-    #     self.load_models()
-
-    # def load_models(self):
-    #     try:
-    #         with open(self.models_file, 'rb') as file:
-    #             self.models = pickle.load(file)
-    #     except FileNotFoundError:
-    #         self.models = []
-
-    #     try:
-    #         with open(self.fitted_models_file, 'rb') as file:
-    #             self.fitted_models = pickle.load(file)
-    #     except FileNotFoundError:
-    #         self.fitted_models = []
-
-    # def save_models(self):
-    #     with open(self.models_file, 'wb') as file:
-    #         pickle.dump(self.models, file)
-
-    #     with open(self.fitted_models_file, 'wb') as file:
-    #         pickle.dump(self.fitted_models, file)
 
     def available_model_list(self, task: str = '') -> str:
         """

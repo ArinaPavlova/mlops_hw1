@@ -101,7 +101,10 @@ class ModelPredict(BaseModel):
 @app.get("/api/model_list/{task}")
 async def model_list(response: Response, task: str):
     """
-    Возвращает список моделей доступных для решения полученной задачи
+    Получает на вход тип задачи и выводит список моделей доступных для ее решения \n
+        task: тип задачи \n
+
+    http://127.0.0.1:8000/api/model_list/{task}
     """
     result, response.status_code = models.available_model_list(task)
     return result
@@ -109,14 +112,17 @@ async def model_list(response: Response, task: str):
 @app.get("/api/get_models")
 async def get_all_models():
     """
-    Возвращает список всех моделей
+    Возвращает список всех моделей \n
+    http://127.0.0.1:8000/api/get_models \n
     """
     return models.models
 
 @app.get("/api/get_model_by_id/{model_id}")
 def get_model_by_id(response: Response, model_id: int):
     """
-    Возвращает модель по id
+    Получает на вход id модели и возвращает ее \n
+        model_id: id модели \n
+    http://127.0.0.1:8000/api/get_model_by_id/{model_id} \n
     """
     result, response.status_code = models.get_model_by_id(model_id)
     return result
@@ -124,7 +130,16 @@ def get_model_by_id(response: Response, model_id: int):
 @app.post("/api/create_model")
 async def create_model(response: Response, request: ModelItem):
     """
-    Создает модель
+    Получает на вход название модели и создает модель  \n
+        { \n
+            "model_name": название модели, которое выбирает пользователь \n
+        } \n
+        return: { \n
+            'model_id' - id модели \n
+            'model_name' - название модели \n
+            'ml_task' -  тип задачи \n
+        } \n
+    http://127.0.0.1:8000/api/create_model
     """
     result, response.status_code = models.create_model(model_name=request.model_name)
     return result
@@ -132,7 +147,16 @@ async def create_model(response: Response, request: ModelItem):
 @app.put("/api/update_model")
 async def update_model(response: Response, request: ModelUpd, status_code=status.HTTP_200_OK):
     """
-    Обновляет модели
+    Получает на вход dict модели и обновляет его \n
+        { \n
+            "model_name":  \n
+                {
+                    "ml_task": "classification", \n
+                    "model_id": 1, \n
+                    "model_name": "LogisticRegression" \n
+                } \n
+        } \n
+    http://127.0.0.1:8000/api/update_model
     """
     status_code = models.update_model(model_name=request.model_name)
     if (status_code != 200):
@@ -141,7 +165,9 @@ async def update_model(response: Response, request: ModelUpd, status_code=status
 @app.delete("/api/delete_model/{model_id}")
 def delete_model(response: Response, model_id: int):
     """
-    Удаляет модель по id
+    Получает на вход id и удаляет выбранную модель  \n
+        model_id: id модели \n
+    http://127.0.0.1:8000/api/delete_model/{model_id}
     """
     status_code = models.delete_model(model_id)
     if (status_code != 200):
@@ -150,7 +176,11 @@ def delete_model(response: Response, model_id: int):
 @app.put("/api/fit/{model_id}")
 async def fit(response: Response, model_id: int, request: ModelFit):
     """
-    Обучает модель
+    Получает на вход id модели, данные для обучения и параметры, возвращает обученную модель \n
+        model_id: id модели, \n
+        data: данные (data_train и target) (dict) \n
+        params: параметры для обучения (dict) \n
+    http://127.0.0.1:8000/api/fit/{model_id}
     """
     model_id = model_id
     result, response.status_code = models.fit(model_id, request.data_train, request.params)
@@ -159,7 +189,10 @@ async def fit(response: Response, model_id: int, request: ModelFit):
 @app.put("/api/predict/{model_id}")
 async def predict(response: Response, model_id: int, request: ModelPredict):
     """
-    Возвращает прогноз модели
+    Получает на вход id модели и тестовую выборку, возвращает прогноз \n
+        model_id: id модели, \n
+        X: выборка для предсказания, без таргета (dict) \n
+    http://127.0.0.1:8000/api/predict/{model_id}
     """
     result, response.status_code = models.predict(model_id, request.data_test)
     return result
